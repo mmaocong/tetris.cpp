@@ -1,0 +1,5 @@
+#pragma once
+
+#define VERSION_MAJOR @SimpleTetris_VERSION_MAJOR@
+#define VERSION_MINOR @SimpleTetris_VERSION_MINOR@
+#define VERSION_PATCH @SimpleTetris_VERSION_PATCH@
