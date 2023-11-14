@@ -1,32 +1,50 @@
-#include "board.hpp"
-#include "pieces.hpp"
+#include "move.hpp"
 #include "term.hpp"
+#include "tetris.hpp"
+#include "vis.hpp"
+#include <iostream>
 
-void autoDown(Pieces::Context &ctx, time_point &lastFall) {
-    if (duration_cast<sec>(steady_clock::now() - lastFall).count() >= 1) {
-        lastFall = steady_clock::now();
-        // increase the y position if not at the bottom
-        Pieces::GoDown(ctx);
+// validate
+bool Valid(const Indices &buffer, const Pixels &board) {
+    // out of bound
+    for (const auto &i : buffer) {
+        if (i == MAX) {
+            return false;
+        }
     }
+    // collision detection
+    for (const auto &i : buffer) {
+        if (board[i] != Canvas::Key::NUL) {
+            return false;
+        }
+    }
+    return true;
 }
 
-void addPiece(const Pieces::Context &ctx, Board::Indices &dst) {
-    // Place Tetromino on output board
-    // for (const auto &idx : ctx.coord) {
-    //     dst[idx] = Board::Ks::BLK;
-    // }
-    for (uint8_t i = 0; i < PIECE_SIZE; i++) {
-        dst[ctx.coord[i]] = Board::Ks::BLK;
+void autoDown(PieceContext &piece, GameContext &game, time_point &lastFall) {
+    if (duration_cast<sec>(steady_clock::now() - lastFall).count() >= 1) {
+        lastFall = steady_clock::now();
+        // move down if possible
+        // add to board otherwise
+        if (Valid(piece.down, game.base)) {
+            Move::Down(piece);
+        } else {
+            // add to board
+            uint8_t idx = Vis::Reload(game);
+            // TODO: check for full rows
+            // spawn new piece
+            Move::Init(idx, piece);
+        }
     }
 }
 
 int main() {
-    Pieces::Context piece = {Pieces::InitCoords::Z};
-    Pieces::InitContext(piece);
+    GameContext game = Vis::InitGame();
+    PieceContext piece;
+    uint8_t idx = Vis::Reload(game);
+    Move::Init(idx, piece);
 
     // Initialize the board
-    Board::Indices board = Board::EMPTY_BOARD;
-    Board::Indices tmpBoard;
     std::string screen;
 
     Term::Termios orig_termios;
@@ -36,29 +54,32 @@ int main() {
 
     while (true) {
         // Game logic for moving down
-        autoDown(piece, lastFall);
+        autoDown(piece, game, lastFall);
 
         char inputChar;
         if (read(STDIN_FILENO, &inputChar, 1) > 0) {
-            if (inputChar == 'h' && true) {
-                Pieces::GoLeft(piece);
+            if (inputChar == 'h' && Valid(piece.left, game.base)) {
+                Move::Left(piece);
             }
-            if (inputChar == 'l' && true) {
-                Pieces::GoRight(piece);
+            if (inputChar == 'l' && Valid(piece.right, game.base)) {
+                Move::Right(piece);
             }
-            if (inputChar == 'k') {
-                Pieces::GoRotate(piece);
+            if (inputChar == 'k' && Valid(piece.rotate, game.base) &&
+                Valid(piece.round, game.base)) {
+                Move::Rotate(piece);
+            }
+            if (inputChar == 'j' && Valid(piece.down, game.base)) {
+                Move::Down(piece);
             }
         }
 
         // fill the board with blocks
-        tmpBoard = board;
-        addPiece(piece, tmpBoard);
+        Vis::UpdateBoard(piece, game);
 
         // Clear the page and move cursor to home position
         std::cout << "\033[2J\033[1;1H";
 
-        Board::visualize(tmpBoard, Board::DICT, screen);
+        Vis::ToStr(game.active, Canvas::MAP, screen);
         std::cout << screen << std::endl;
 
         // Optional: Add a short delay for smoother animation

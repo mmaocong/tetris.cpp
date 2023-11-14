@@ -4,14 +4,14 @@ project(SimpleTetris VERSION 1.0.0)
 
 # define sources and headers
 set(SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/board.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/pieces.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/vis.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
 )
 set(HEADERS
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/board.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/pieces.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/move.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/term.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/tetris.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/vis.hpp"
 )
 
 # Create the executable
