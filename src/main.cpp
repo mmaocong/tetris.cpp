@@ -31,7 +31,12 @@ void autoDown(PieceContext &piece, GameContext &game, time_point &lastFall) {
         } else {
             // add to board
             uint8_t idx = Vis::Reload(game);
-            // TODO: check for full rows
+            // check for full rows
+            uint16_t rows = Vis::RowsExplode(game.active);
+            // update to base board
+            game.base = game.active;
+            // update score
+            game.lines += rows;
             // spawn new piece
             Move::Init(idx, piece);
         }
