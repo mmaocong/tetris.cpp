@@ -1,6 +1,7 @@
 #pragma once
 
-#include "tetris.hpp"
+#include "consts.hpp"
+#include "types.hpp"
 
 namespace Vis {
 
@@ -12,12 +13,12 @@ namespace Vis {
         memset(base, Canvas::Key::NUL, sizeof(Pixels));
         memset(active, Canvas::Key::NUL, sizeof(Pixels));
         // copy the base board to the active board
-        return {*base, *active, uint16_t(0), uint8_t(rand() % Piece::NUM)};
+        return {steady_clock::now(), *base, *active, uint16_t(0),
+                uint8_t(rand() % Piece::NUM)};
     }
 
-    static inline uint8_t Reload(GameContext &game) {
-        // copy active board to base board
-        game.base = game.active;
+    // pop a piece and update the index of the next
+    static inline uint8_t Pop(GameContext &game) {
         uint8_t idx = game.next;
         // update next piece
         game.next = uint8_t(rand() % Piece::NUM);
@@ -56,22 +57,22 @@ namespace Vis {
     }
 
     // check for full rows and remove them
-    static inline uint16_t RowsExplode(Pixels &board) {
-        uint16_t count = 0;
+    static inline void RowsExplode(GameContext &game) {
         // check for full rows
         for (uint8_t row = 0; row < HEIGHT; ++row) {
             // check if the row is full
-            if (CheckRowFull(board, row)) {
+            if (CheckRowFull(game.active, row)) {
                 // remove the row
-                RmRow(board, row);
+                RmRow(game.active, row);
                 // increment the score
-                ++count;
+                ++game.lines;
             }
         }
-        return count;
+        // update the base board
+        game.base = game.active;
     }
 
     // visualize the board
-    void ToStr(const Pixels &, const Dict &, str &);
+    void ToStr(const Pixels &, const Dict &, Screen &);
 
 } // namespace Vis

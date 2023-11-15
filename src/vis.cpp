@@ -1,19 +1,14 @@
 #include "vis.hpp"
-#include "tetris.hpp"
 
-void Vis::ToStr(const Pixels &src, const Dict &dict, str &out) {
-    out = "";
-    uint8_t old_row = 0;
-    for (size_t i = 0; i < src.size(); ++i) {
-        // add new line for each row
-        uint8_t row = i / WIDTH;
-        if (row > old_row) {
-            out += "\n";
-            old_row = row;
+void Vis::ToStr(const Pixels &src, const Dict &dict, Screen &out) {
+    for (uint8_t row = 0; row < HEIGHT; ++row) {
+        std::string line = "";
+        for (uint8_t col = 0; col < WIDTH; ++col) {
+            uint8_t index = row * WIDTH + col;
+            if (dict.find(src[index]) != dict.end()) {
+                line += dict.at(src[index]);
+            }
         }
-
-        if (dict.find(src[i]) != dict.end()) {
-            out += dict.at(src[i]);
-        }
+        out[row] = line;
     }
 }

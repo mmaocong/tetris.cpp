@@ -1,47 +1,11 @@
+// ----------------------------------------------------------------------------
+// Constants used in the game
+// ----------------------------------------------------------------------------
+
 #pragma once
 
-#include <map>
+#include "types.hpp"
 #include <string>
-
-#define HEIGHT 20
-#define WIDTH 10
-#define BOARD_SIZE HEIGHT *WIDTH
-#define MAX 255
-#define PIECE_SIZE 4
-
-typedef std::string str;
-
-// dense representation of the board as pixels i.e. Canvas::Key
-typedef std::array<uint8_t, BOARD_SIZE> Pixels;
-
-// sparse representation of tetrominos on the board as indices
-typedef std::array<uint8_t, PIECE_SIZE> Indices;
-
-// map board keys to strings
-typedef std::map<uint8_t, str> Dict;
-
-// holds the current piece type and position
-typedef struct {
-    uint8_t shape;  // piece current shape
-    Indices coord;  // current position
-    Indices left;   // left position
-    Indices right;  // right position
-    Indices down;   // down position
-    Indices rotate; // rotated position
-    Indices round;  // surrounding position (detect rotation collision)
-} PieceContext;
-
-typedef struct {
-    Pixels &base;   // base board
-    Pixels &active; // active board (base + active piece)
-    uint16_t lines; // lines cleared
-    uint8_t next;   // next piece type
-    char pad[5];    // padding
-} GameContext;
-
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
 
 // Pieces i.e. tetrominos
 //
@@ -50,20 +14,20 @@ typedef struct {
 //                       [2]
 //                       [3]
 //
-// L0: [0]           L1:       [3]     L2: [3][2]        L3:
-//     [1]               [0][1][2]            [1]            [2][1][0]
-//     [2][3]                                 [0]            [3]
+// L0: [0]           L1:       [0]     L2: [0][1]        L3:
+//     [1]               [1][2][3]            [2]            [0][1][2]
+//     [2][3]                                 [3]            [3]
 //
-// T0:               T1: [2]           T2:    [3]        T3:    [0]
-//     [0][1][2]         [1][3]            [2][1][0]         [3][1]
-//        [3]            [0]                                    [2]
+// T0:               T1: [0]           T2:    [0]        T3:    [0]
+//     [0][1][2]         [1][2]            [1][2][3]         [1][2]
+//        [3]            [3]                                    [3]
 //
 // O0: [0][1]
 //     [2][3]
 //
-// Z0:               Z1:    [3]
+// Z0:               Z1:    [0]
 //     [0][1]            [1][2]
-//        [2][3]         [0]
+//        [2][3]         [3]
 namespace Piece {
 
     static constexpr uint8_t NUM = 5;

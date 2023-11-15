@@ -8,9 +8,10 @@ set(SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
 )
 set(HEADERS
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/types.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/consts.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/move.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/term.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/tetris.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/vis.hpp"
 )
 
