@@ -3,7 +3,6 @@
 #include "term.hpp"
 #include "types.hpp"
 #include "vis.hpp"
-#include <iostream>
 
 // game logic of auto falling
 void Fall(PieceContext &piece, GameContext &game, bool &game_over) {

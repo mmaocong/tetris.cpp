@@ -1,14 +1,14 @@
 #pragma once
 
-#include "config.h"
-#include "consts.hpp"
-#include "types.hpp"
-
 #include <fcntl.h>
 #include <iomanip>
 #include <iostream>
 #include <termios.h>
 #include <unistd.h>
+
+#include "config.h"
+#include "consts.hpp"
+#include "types.hpp"
 
 namespace Term {
 

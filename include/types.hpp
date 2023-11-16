@@ -6,7 +6,9 @@
 
 #pragma once
 
+#include <chrono>
 #include <map>
+#include <stdint.h>
 
 #define HEIGHT 20
 #define WIDTH 10

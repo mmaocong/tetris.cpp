@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include "types.hpp"
 #include <string>
+
+#include "types.hpp"
 
 // Pieces i.e. tetrominos
 //

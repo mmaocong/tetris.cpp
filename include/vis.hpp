@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstring>
+
 #include "consts.hpp"
 #include "types.hpp"
 
