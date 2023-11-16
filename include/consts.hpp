@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <array>
 
 #include "types.hpp"
 

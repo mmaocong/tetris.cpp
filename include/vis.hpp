@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstring>
+#include <algorithm>
 
 #include "consts.hpp"
 #include "types.hpp"
