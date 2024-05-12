@@ -1,18 +1,19 @@
 #pragma once
 
+#include "config.h"
+#include "const.hpp"
 #include <fcntl.h>
 #include <iomanip>
 #include <iostream>
 #include <termios.h>
 #include <unistd.h>
 
-#include "config.h"
-#include "consts.hpp"
-#include "types.hpp"
-
 namespace Term {
 
     using Termios = struct termios;
+
+    // for terminal UI, each element represents a row
+    using Screen = std::array<std::string, HEIGHT>;
 
     static inline void enableRawMode(Termios &orig_termios) {
         tcgetattr(STDIN_FILENO, &orig_termios);

@@ -1,24 +1,54 @@
-#include "consts.hpp"
-#include "move.hpp"
+#include "board.hpp"
+#include "const.hpp"
+#include "piece.hpp"
 #include "term.hpp"
-#include "types.hpp"
-#include "vis.hpp"
 
-// game logic of auto falling
-void Fall(PieceContext &piece, GameContext &game, bool &game_over) {
-    if (duration_cast<sec>(steady_clock::now() - game.last_fall).count() >= 1) {
-        game.last_fall = steady_clock::now();
+// collision / out of bound detection
+// return false if it is a valid piece placement
+static inline bool collide(const Piece::Coord &coord, const Board::Matrix &mx) {
+    // out of bound
+    for (const auto &i : coord) {
+        if (i == Piece::kNanInd) {
+            return true;
+        }
+    }
+    // collision detection
+    for (const auto &i : coord) {
+        if (mx[i] != Board::Pixel::NUL) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// visualize the board matrix
+static inline void to_str(const Board::Matrix &mx, Term::Screen &out) {
+    for (uint8_t row = 0; row < HEIGHT; ++row) {
+        std::string line = "";
+        for (uint8_t col = 0; col < WIDTH; ++col) {
+            uint8_t index = row * WIDTH + col;
+            line += Board::px2str(mx[index]);
+        }
+        out[row] = line;
+    }
+}
+
+// run one step of the game loop (piece falling)
+void piece_step(Piece::Context &piece, Board::Context &board, bool &game_over) {
+    if (duration_cast<sec>(steady_clock::now() - board.last_fall).count() >=
+        1) {
+        board.last_fall = steady_clock::now();
         // move down if possible
         // add to board otherwise
-        if (Move::Valid(piece.down, game.base)) {
-            Move::Down(piece);
+        if (!collide(piece.down, board.base)) {
+            piece.Down();
         } else {
             // explode full rows
-            Vis::RowsExplode(game);
+            board.RowsExplode();
             // initiate new piece
-            Move::Spawn(Vis::Pop(game), piece);
+            piece.Spawn(board.Pop());
             // check if the game is over
-            if (!Move::Valid(piece.down, game.base)) {
+            if (collide(piece.down, board.base)) {
                 game_over = true;
             }
         }
@@ -32,26 +62,26 @@ int main() {
 
     // Initialize the board
     bool game_over = false;
-    Screen board;
+    Term::Screen screen;
     char ctrl;
 
-    GameContext game = Vis::InitGame();
-    PieceContext piece;
-    Move::Spawn(Vis::Pop(game), piece);
+    Board::Context board = Board::Context();
+    Piece::Context piece;
+    piece.Spawn(board.Pop());
 
     while (!game_over) {
-        Fall(piece, game, game_over);
+        piece_step(piece, board, game_over);
 
         if (read(STDIN_FILENO, &ctrl, 1) > 0) {
-            if (ctrl == 'h' && Move::Valid(piece.left, game.base)) {
-                Move::Left(piece);
-            } else if (ctrl == 'l' && Move::Valid(piece.right, game.base)) {
-                Move::Right(piece);
-            } else if (ctrl == 'k' && Move::Valid(piece.rotate, game.base) &&
-                       Move::Valid(piece.round, game.base)) {
-                Move::Rotate(piece);
-            } else if (ctrl == 'j' && Move::Valid(piece.down, game.base)) {
-                Move::Down(piece);
+            if (ctrl == 'h' && !collide(piece.left, board.base)) {
+                piece.Left();
+            } else if (ctrl == 'l' && !collide(piece.right, board.base)) {
+                piece.Right();
+            } else if (ctrl == 'k' && !collide(piece.rotate, board.base) &&
+                       !collide(piece.round, board.base)) {
+                piece.Rotate();
+            } else if (ctrl == 'j' && !collide(piece.down, board.base)) {
+                piece.Down();
             } else if (ctrl == 'p') { // pause by pressing 'p'
                 while (true) {
                     if (read(STDIN_FILENO, &ctrl, 1) > 0 && ctrl == 'p') {
@@ -68,14 +98,14 @@ int main() {
         }
 
         // fill the board with blocks
-        Vis::UpdateBoard(piece, game);
-        Vis::ToStr(game.active, Canvas::MAP, board);
+        board.UpdateBoard(piece);
+        to_str(board.active, screen);
 
         // clear the screen
         Term::clearScreen();
 
         // print the board
-        Term::printScreen(board, game.lines, game_over);
+        Term::printScreen(screen, board.lines, game_over);
 
         // Optional: Add a short delay for smoother animation
         usleep(50000); // 50 milliseconds
