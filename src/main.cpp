@@ -3,52 +3,34 @@
 #include "piece.hpp"
 #include "term.hpp"
 
-// collision / out of bound detection
-// return false if it is a valid piece placement
-static inline bool collide(const Piece::Coord &coord, const Board::Matrix &mx) {
-    // out of bound
-    for (const auto &i : coord) {
-        if (i == Piece::kNanInd) {
-            return true;
-        }
-    }
-    // collision detection
-    for (const auto &i : coord) {
-        if (mx[i] != Board::Pixel::NUL) {
-            return true;
-        }
-    }
-    return false;
-}
-
 // visualize the board matrix
-static inline void to_str(const Board::Matrix &mx, Term::Screen &out) {
+static inline void to_str(const field_t &mx, term::Screen &out) {
     for (uint8_t row = 0; row < HEIGHT; ++row) {
         std::string line = "";
         for (uint8_t col = 0; col < WIDTH; ++col) {
             uint8_t index = row * WIDTH + col;
-            line += Board::px2str(mx[index]);
+            line += board::px2str(mx[index]);
         }
         out[row] = line;
     }
 }
 
 // run one step of the game loop (piece falling)
-void piece_step(Piece::Context &piece, Board::Context &board, bool &game_over) {
-    if (duration_cast<sec>(steady_clock::now() - board.last_fall).count() >=
+void piece_step(piece::Context &p_ctx, board::Context &b_ctx, bool &game_over) {
+    if (duration_cast<sec>(steady_clock::now() - b_ctx.last_fall).count() >=
         1) {
-        board.last_fall = steady_clock::now();
+        b_ctx.last_fall = steady_clock::now();
         // move down if possible
         // add to board otherwise
-        if (!collide(piece.down, board.base)) {
-            piece.Down();
+        if (!board::collide(p_ctx.down, b_ctx.base)) {
+            p_ctx.Down();
         } else {
             // explode full rows
-            board.RowsExplode();
+            b_ctx.RowsExplode();
             // initiate new piece
-            piece.Spawn(board.Pop());
+            p_ctx.Spawn(b_ctx.Pop());
             // check if the game is over
-            if (collide(piece.down, board.base)) {
+            if (board::collide(p_ctx.down, b_ctx.base)) {
                 game_over = true;
             }
         }
@@ -57,31 +39,33 @@ void piece_step(Piece::Context &piece, Board::Context &board, bool &game_over) {
 
 int main() {
     // Enable raw mode
-    Term::Termios orig_termios;
-    Term::enableRawMode(orig_termios);
+    term::Termios orig_termios;
+    term::enableRawMode(orig_termios);
 
     // Initialize the board
     bool game_over = false;
-    Term::Screen screen;
+    term::Screen screen;
     char ctrl;
 
-    Board::Context board = Board::Context();
-    Piece::Context piece;
-    piece.Spawn(board.Pop());
+    board::Context b_ctx = board::Context();
+    piece::Context p_ctx;
+    p_ctx.Spawn(b_ctx.Pop());
 
     while (!game_over) {
-        piece_step(piece, board, game_over);
+        piece_step(p_ctx, b_ctx, game_over);
 
         if (read(STDIN_FILENO, &ctrl, 1) > 0) {
-            if (ctrl == 'h' && !collide(piece.left, board.base)) {
-                piece.Left();
-            } else if (ctrl == 'l' && !collide(piece.right, board.base)) {
-                piece.Right();
-            } else if (ctrl == 'k' && !collide(piece.rotate, board.base) &&
-                       !collide(piece.round, board.base)) {
-                piece.Rotate();
-            } else if (ctrl == 'j' && !collide(piece.down, board.base)) {
-                piece.Down();
+            if (ctrl == 'h' && !board::collide(p_ctx.left, b_ctx.base)) {
+                p_ctx.Left();
+            } else if (ctrl == 'l' &&
+                       !board::collide(p_ctx.right, b_ctx.base)) {
+                p_ctx.Right();
+            } else if (ctrl == 'k' &&
+                       !board::collide(p_ctx.rotate, b_ctx.base) &&
+                       !board::collide(p_ctx.round, b_ctx.base)) {
+                p_ctx.Rotate();
+            } else if (ctrl == 'j' && !board::collide(p_ctx.down, b_ctx.base)) {
+                p_ctx.Down();
             } else if (ctrl == 'p') { // pause by pressing 'p'
                 while (true) {
                     if (read(STDIN_FILENO, &ctrl, 1) > 0 && ctrl == 'p') {
@@ -98,19 +82,19 @@ int main() {
         }
 
         // fill the board with blocks
-        board.UpdateBoard(piece);
-        to_str(board.active, screen);
+        b_ctx.UpdateBoard(p_ctx.cur);
+        to_str(b_ctx.active, screen);
 
         // clear the screen
-        Term::clearScreen();
+        term::clearScreen();
 
         // print the board
-        Term::printScreen(screen, board.lines, game_over);
+        term::printScreen(screen, b_ctx.lines, game_over);
 
         // Optional: Add a short delay for smoother animation
         usleep(50000); // 50 milliseconds
     }
 
-    Term::disableRawMode(orig_termios);
+    term::disableRawMode(orig_termios);
     return 0;
 }

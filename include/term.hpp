@@ -8,7 +8,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-namespace Term {
+namespace term {
 
     using Termios = struct termios;
 
@@ -63,4 +63,4 @@ namespace Term {
         std::cout << std::string(42, '#') << std::endl;
     }
 
-} // namespace Term
+} // namespace term
