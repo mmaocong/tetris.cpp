@@ -1,7 +1,6 @@
 #pragma once
 
 #include "const.hpp"
-#include "piece.hpp"
 #include <algorithm>
 #include <cstring>
 
@@ -15,50 +14,51 @@
 // - The board is represented as a 1D array of 200 cells.
 namespace Board {
 
-    enum class Pixel : uint8_t {
-        NUL = 0, // empty
-        BLK = 1, // block
-    };
-
     namespace {
+        enum class Pixel : uint8_t {
+            NUL = 0, // empty
+            BLK = 1, // block
+        };
+
         inline constexpr uint8_t kNCell = 2;
         inline static constexpr std::array<const char[3], kNCell> kArrCellStr =
             {"  ", "[]"};
+        inline static uint8_t rand_type() { return rand() % 5; }
     } // namespace
 
     // convert pixel to string for terminal display
-    static inline const std::string px2str(Pixel px) {
-        return kArrCellStr[static_cast<uint8_t>(px)];
+    static inline const std::string px2str(uint8_t idx) {
+        return kArrCellStr[idx];
     }
 
-    // dense matrix representation of the board as `Pixel`s
-    using Matrix = std::array<Pixel, HEIGHT * WIDTH>;
-
     // Initialize a `Pixels` array in heap memory with all 0s
-    static inline Matrix *new_board() {
-        Matrix *pixels = new Matrix;
-        memset(pixels, 0, sizeof(Matrix));
+    static inline field_t *new_board() {
+        field_t *pixels = new field_t;
+        memset(pixels, 0, TOTAL);
         return pixels;
     }
 
     // check if a row is full
-    static inline bool check_row(const Matrix &board, const uint8_t row) {
+    static inline bool check_row(const field_t &board, const uint8_t row) {
         // check if the row is full
         return std::all_of(board.begin() + row * WIDTH,
                            board.begin() + (row + 1) * WIDTH,
-                           [](const auto &i) { return i != Pixel::NUL; });
+                           [](const auto &i) {
+                               return i != static_cast<uint8_t>(Pixel::NUL);
+                           });
     }
 
     // remove a row from the board
     //
     // 1. shift above rows down
     // 2. set the top row to empty
-    static inline void rm_row(Matrix &board, const uint8_t row) {
+    static inline void rm_row(field_t &board, const uint8_t row) {
         // shift by std::copy rows [0, row) to rows [1, row + 1)
         std::copy(board.begin(), board.begin() + row * WIDTH,
                   board.begin() + WIDTH);
         // set the top row to empty
-        std::fill(board.begin(), board.begin() + WIDTH, Pixel::NUL);
+        std::fill(board.begin(), board.begin() + WIDTH,
+                  static_cast<uint8_t>(Pixel::NUL));
     }
 
     // TODO:
@@ -67,30 +67,30 @@ namespace Board {
     // - add indices of lines exploded for animation from the client
     struct Context {
         time_point last_fall; // last fall timestamp
-        Matrix &base;         // base board
-        Matrix &active;       // active board (base + active piece)
+        field_t &base;        // base board
+        field_t &active;      // active board (base + active piece)
         uint16_t lines;       // lines cleared
-        Piece::Type next;     // next piece type
-        char pad[5];          // padding
+        uint8_t next; // next piece type (IMP: enum class Type in piece.hpp)
+        char pad[5];
 
         // constructor
         Context()
             : last_fall(steady_clock::now()), base(*new_board()),
-              active(*new_board()), lines(0), next(Piece::rand_type()) {}
+              active(*new_board()), lines(0), next(rand_type()) {}
 
-        const Piece::Type Pop() {
-            Piece::Type next_type = this->next;
+        uint8_t Pop() {
+            uint8_t next_type = this->next;
             // update next piece
-            this->next = Piece::rand_type();
+            this->next = rand_type();
             return next_type;
         }
 
-        void UpdateBoard(const Piece::Context &piece) {
+        void UpdateBoard(const std::array<uint8_t, NBRK> &indices) {
             // copy the base board to the active board
             this->active = this->base;
             // Place Tetromino on output board
-            for (const auto &i : piece.cur) {
-                this->active[i] = Pixel::BLK;
+            for (const auto &i : indices) {
+                this->active[i] = static_cast<uint8_t>(Pixel::BLK);
             }
         }
 

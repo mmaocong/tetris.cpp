@@ -5,16 +5,16 @@
 
 // collision / out of bound detection
 // return false if it is a valid piece placement
-static inline bool collide(const Piece::Coord &coord, const Board::Matrix &mx) {
+static inline bool collide(const brick_t &indices, const field_t &mx) {
     // out of bound
-    for (const auto &i : coord) {
-        if (i == Piece::kNanInd) {
+    for (const auto &i : indices) {
+        if (i == IDX_NA) {
             return true;
         }
     }
     // collision detection
-    for (const auto &i : coord) {
-        if (mx[i] != Board::Pixel::NUL) {
+    for (const auto &i : indices) {
+        if (mx[i] != static_cast<uint8_t>(Board::Pixel::NUL)) {
             return true;
         }
     }
@@ -22,7 +22,7 @@ static inline bool collide(const Piece::Coord &coord, const Board::Matrix &mx) {
 }
 
 // visualize the board matrix
-static inline void to_str(const Board::Matrix &mx, Term::Screen &out) {
+static inline void to_str(const field_t &mx, Term::Screen &out) {
     for (uint8_t row = 0; row < HEIGHT; ++row) {
         std::string line = "";
         for (uint8_t col = 0; col < WIDTH; ++col) {
@@ -98,7 +98,7 @@ int main() {
         }
 
         // fill the board with blocks
-        board.UpdateBoard(piece);
+        board.UpdateBoard(piece.cur);
         to_str(board.active, screen);
 
         // clear the screen
