@@ -18,10 +18,10 @@ namespace board {
     // - add indices of lines exploded for animation from the client
     struct Context {
         time_point last_fall; // last fall timestamp
-        field_t &base;        // base board
-        field_t &active;      // active board (base + active piece)
+        field_t base;         // base board
+        field_t active;       // active board (base + active piece)
         uint16_t lines;       // lines cleared
-        uint8_t next; // next piece type (IMP: enum class Type in piece.hpp)
+        uint8_t next;         // seed for the next piece
         char pad[5];
 
         // constructor

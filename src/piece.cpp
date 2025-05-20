@@ -23,6 +23,9 @@
 //     [0][1]            [1][2]
 //        [2][3]         [3]
 namespace {
+
+    static constexpr uint8_t kNType = 5;
+
     enum class Type : uint8_t {
         I = 0,
         L,
@@ -62,16 +65,14 @@ namespace {
     };
 
     static inline constexpr uint8_t next_state(const uint8_t state) {
-        try {
-            return kMapState2Next.at(state);
-        } catch (const std::out_of_range &e) {
+        if (state >= kMapState2Next.size())
             return static_cast<uint8_t>(State::NONE);
-        }
+        return kMapState2Next[state];
     }
 
     // Initial states of the pieces
-    static constexpr std::array<std::pair<uint8_t, brick_t>, 5> kMapBrickInit =
-        {
+    static constexpr std::array<std::pair<uint8_t, brick_t>, kNType>
+        kMapBrickInit = {
             std::make_pair(static_cast<uint8_t>(State::I0),
                            brick_t{3, 4, 5, 6}),
             std::make_pair(static_cast<uint8_t>(State::L0),
@@ -237,11 +238,9 @@ namespace {
     // pieces should always follow the top-down, left-right order
     static inline void update_rot(const brick_t &src, const uint8_t state,
                                   brick_t &dst) {
-        try {
-            dst = kMapState2FnRotate.at(state)(src);
-        } catch (const std::out_of_range &e) {
-            dst = src;
-        }
+        if (state >= kMapState2FnRotate.size())
+            return;
+        dst = kMapState2FnRotate[state](src);
     }
 
     // TODO: currently use placeholder (`src[0]`) when no more than 5 cells
@@ -355,13 +354,12 @@ namespace {
     // NOTE: FSM
     // update indices of cells around the piece which may prevent rotation
     // (rotated cells are not included)
-    static inline void update_ard(const brick_t &src, const uint8_t shape,
+    static inline void update_ard(const brick_t &src, const uint8_t state,
                                   brick_t &dst) {
-        try {
-            dst = kMapState2FnAround.at(shape)(src);
-        } catch (const std::out_of_range &e) {
-            dst = src;
-        }
+
+        if (state >= kMapState2FnAround.size())
+            return;
+        dst = kMapState2FnAround[state](src);
     }
 
     // update left coord
@@ -387,13 +385,10 @@ namespace {
 
 } // namespace
 
-// initialize piece context according to index
-void piece::Context::Spawn(const uint8_t &index) {
-    try {
-        std::tie(state, cur) = kMapBrickInit.at(index);
-    } catch (const std::out_of_range &e) {
-        std::tie(state, cur) = kMapBrickInit.at(0);
-    }
+// initialize piece context according to the seed
+void piece::Context::Spawn(const uint8_t &seed) {
+    const uint8_t idx = seed % kNType;
+    std::tie(state, cur) = kMapBrickInit.at(idx);
 
     update_left(cur, left);
     update_right(cur, right);

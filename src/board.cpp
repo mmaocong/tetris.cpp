@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cstring>
+#include <random>
 
 #include "board.hpp"
 
@@ -12,13 +13,12 @@ namespace {
     inline constexpr uint8_t kNCell = 2;
     inline static constexpr std::array<const char[3], kNCell> kArrCellStr = {
         "  ", "[]"};
-    inline static uint8_t rand_type() { return rand() % 5; }
 
-    // Initialize a `Pixels` array in heap memory with all 0s
-    static inline field_t *new_board() {
-        field_t *pixels = new field_t;
-        memset(pixels, 0, TOTAL);
-        return pixels;
+    // Generate a random integer within uint8_t range
+    static inline uint8_t rand_int() {
+        static thread_local std::mt19937 rng(std::random_device{}());
+        std::uniform_int_distribution<uint8_t> dist(0, UINT8_MAX);
+        return dist(rng);
     }
 
     // check if a row is full
@@ -51,13 +51,15 @@ std::string board::px2str(const uint8_t idx) { return kArrCellStr[idx]; }
 
 // constructor
 board::Context::Context()
-    : last_fall(steady_clock::now()), base(*new_board()), active(*new_board()),
-      lines(0), next(rand_type()) {}
+    : last_fall(steady_clock::now()), lines(0), next(rand_int()) {
+    std::fill(base.begin(), base.end(), static_cast<uint8_t>(Pixel::NUL));
+    std::fill(active.begin(), active.end(), static_cast<uint8_t>(Pixel::NUL));
+}
 
 uint8_t board::Context::Pop() {
     uint8_t next_type = this->next;
     // update next piece
-    this->next = rand_type();
+    this->next = rand_int();
     return next_type;
 }
 
@@ -90,7 +92,8 @@ void board::Context::RowsExplode() {
 bool board::collide(const brick_t &indices, const field_t &mx) {
     // out of bound
     for (const auto &i : indices) {
-        if (i == IDX_NA) {
+        // this also checks for IDX_NA
+        if (i >= TOTAL) {
             return true;
         }
     }
