@@ -12,9 +12,6 @@ namespace term {
 
     using Termios = struct termios;
 
-    // for terminal UI, each element represents a row
-    using Screen = std::array<std::string, HEIGHT>;
-
     static inline void enableRawMode(Termios &orig_termios) {
         tcgetattr(STDIN_FILENO, &orig_termios);
         struct termios raw = orig_termios;
@@ -33,15 +30,16 @@ namespace term {
     // Clear the page and move cursor to home position
     static inline void clearScreen() { std::cout << "\033[2J\033[1;1H"; }
 
-    static inline void printScreen(const Screen &board, const uint16_t &s,
-                                   const bool &game_over) {
+    static inline void
+    printScreen(const std::array<std::string, HEIGHT> &screen,
+                const uint16_t &s, const bool &game_over) {
         // add top border
         std::cout << std::string(42, '#') << std::endl;
-        for (uint8_t i = 0; i < board.size(); ++i) {
+        for (uint8_t i = 0; i < screen.size(); ++i) {
             // add left separator
             std::cout << "##";
             // print line
-            std::cout << board[i];
+            std::cout << screen[i];
             // add right separator
             std::cout << "##";
             if (i == 2) {

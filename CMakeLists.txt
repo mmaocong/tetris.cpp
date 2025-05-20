@@ -24,13 +24,12 @@ set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=lld")
 # define sources and headers
 set(SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/board.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/piece.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/core_board.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/core_piece.cpp"
 )
 set(HEADERS
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/board.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/const.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/piece.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/core.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/term.hpp"
 )
 

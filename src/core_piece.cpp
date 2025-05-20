@@ -1,5 +1,4 @@
-#include "piece.hpp"
-#include "const.hpp"
+#include "core.hpp"
 
 // Pieces i.e. tetrominos
 //
@@ -386,7 +385,7 @@ namespace {
 } // namespace
 
 // initialize piece context according to the seed
-void piece::Context::Spawn(const uint8_t &seed) {
+void core::Piece::Spawn(const uint8_t &seed) {
     const uint8_t idx = seed % kNType;
     std::tie(state, cur) = kMapBrickInit.at(idx);
 
@@ -397,7 +396,7 @@ void piece::Context::Spawn(const uint8_t &seed) {
     update_ard(cur, state, round);
 }
 
-void piece::Context::Rotate() {
+void core::Piece::Rotate() {
     // replace current with rotate
     cur = rotate;
     // update shape
@@ -413,7 +412,7 @@ void piece::Context::Rotate() {
     update_ard(cur, state, round);
 }
 
-void piece::Context::Left() {
+void core::Piece::Left() {
     // replace right with current
     right = cur;
     // replace current with left
@@ -426,7 +425,7 @@ void piece::Context::Left() {
     update_ard(cur, state, round);
 }
 
-void piece::Context::Right() {
+void core::Piece::Right() {
     // replace left with current
     left = cur;
     // replace current with right
@@ -439,7 +438,7 @@ void piece::Context::Right() {
     update_ard(cur, state, round);
 }
 
-void piece::Context::Down() {
+void core::Piece::Down() {
     // replace current with down
     cur = down;
     // down move down
