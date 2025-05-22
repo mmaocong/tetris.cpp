@@ -64,7 +64,7 @@ uint8_t core::Board::Pop() {
 }
 
 // Update the active board with base board and the current piece
-void core::Board::UpdateActive(const std::array<uint8_t, NBRK> &indices) {
+void core::Board::UpdateActive(const brick_t &indices) {
     // copy the base board to the active board
     this->active = this->base;
     // Place Tetromino on output board

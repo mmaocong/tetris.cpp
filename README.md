@@ -81,6 +81,69 @@ Structures:
 
 ### Brick Rotation State Machine
 
+```none
++-------+
+|  O-0  | -------.
+|       | <------.
++-------+     
+|  I-0  | <------.
+|       | ----.  |
++-------+     |  |
+|  I-1  | <---.  |
+|       | -------.
++-------+ 
+|  T-0  | <------.
+|       | ----.  |
++-------+     |  |
+|  T-1  | <---.  |
+|       | ----.  |
++-------+     |  |
+|  T-2  | <---.  |
+|       | ----.  |
++-------+     |  |
+|  T-3  | <---.  |
+|       | -------.
++-------+     
+|  Z-0  | <------.
+|       | ----.  |
++-------+     |  |
+|  Z-1  | <---.  |
+|       | -------.
++-------+ 
+|  S-0  | <------.
+|       | ----.  |
++-------+     |  |
+|  S-1  | <---.  |
+|       | -------.
++-------+ 
+|  L-0  | <------.
+|       | ----.  |
++-------+     |  |
+|  L-1  | <---.  |
+|       | ----.  |
++-------+     |  |
+|  L-2  | <---.  |
+|       | ----.  |
++-------+     |  |
+|  L-3  | <---.  |
+|       | -------.
++-------+     
+|  J-0  | <------.
+|       | ----.  |
++-------+     |  |
+|  J-1  | <---.  |
+|       | ----.  |
++-------+     |  |
+|  J-2  | <---.  |
+|       | ----.  |
++-------+     |  |
+|  J-3  | <---.  |
+|       | -------.
++-------+     
+```
+
+Figure: Brick Rotation State Transition
+
 Each `Piece.state` represents a orientation variant changed by rotation, and
 transitions are encoded in:
 
@@ -103,9 +166,11 @@ moves:
 
 To add a new tetromino:
 
-- Add a new `enum class Type` and `State` entries
+- Add new `enum class State` entries
+- Increase `kNType` and `kNState`
 - Extend:
 
+  - `kMapState2Next` for state transitions
   - `kMapBrickInit` for initial position
   - `kMapState2FnRotate` for rotation logic
   - `kMapState2FnAround` for rotation collision detection

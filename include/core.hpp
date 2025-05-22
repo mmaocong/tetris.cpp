@@ -30,7 +30,7 @@ namespace core {
 
         uint8_t Pop();
 
-        void UpdateActive(const std::array<uint8_t, NBRK> &);
+        void UpdateActive(const brick_t &);
 
         void Land();
     };
@@ -44,6 +44,8 @@ namespace core {
         brick_t down;   // down position
         brick_t rotate; // rotated position
         brick_t round;  // surrounding position (detect rotation collision)
+
+        char Shape(const uint8_t &);
 
         // initialize piece context according to index
         void Spawn(const uint8_t &);
