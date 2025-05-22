@@ -30,7 +30,7 @@ namespace core {
 
         uint8_t Pop();
 
-        void UpdateActive(const std::array<uint8_t, NBRK> &);
+        void UpdateActive(const brick_t &);
 
         void Land();
     };
