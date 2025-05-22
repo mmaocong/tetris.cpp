@@ -103,9 +103,11 @@ moves:
 
 To add a new tetromino:
 
-- Add a new `enum class Type` and `State` entries
+- Add new `enum class State` entries
+- Increase `kNType` and `kNState`
 - Extend:
 
+  - `kMapState2Next` for state transitions
   - `kMapBrickInit` for initial position
   - `kMapState2FnRotate` for rotation logic
   - `kMapState2FnAround` for rotation collision detection
