@@ -45,6 +45,8 @@ namespace core {
         brick_t rotate; // rotated position
         brick_t round;  // surrounding position (detect rotation collision)
 
+        char Shape(const uint8_t &);
+
         // initialize piece context according to index
         void Spawn(const uint8_t &);
 

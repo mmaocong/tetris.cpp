@@ -84,6 +84,10 @@ namespace {
                            brick_t{5, 15, 24, 25}),
     };
 
+    static constexpr std::array<char, kNStateInit> kArrShapeInit = {
+        'O', 'I', 'T', 'Z', 'S', 'L', 'J',
+    };
+
     static constexpr std::array<uint8_t, kNState> kMapState2Next = {
         static_cast<uint8_t>(State::O0), // trivial
         static_cast<uint8_t>(State::I1), // I0 -> I1
@@ -517,10 +521,16 @@ void core::Piece::Spawn(const uint8_t &seed) {
     update_ard(cur, state, round);
 }
 
+// Get the shape of the piece according to the seed
+char core::Piece::Shape(const uint8_t &seed) {
+    const uint8_t idx = seed % kNStateInit;
+    return kArrShapeInit.at(idx);
+}
+
 void core::Piece::Rotate() {
     // replace current with rotate
     cur = rotate;
-    // update shape
+    // update state
     state = next_state(state);
 
     // rotate go rotate

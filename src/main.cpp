@@ -1,6 +1,27 @@
 #include "core.hpp"
 #include "term.hpp"
 
+void handle_key(char key, core::Piece &p, const core::Board &b, bool &over) {
+    if (key == 'h' && !core::collide(p.left, b.base)) {
+        p.Left();
+    } else if (key == 'l' && !core::collide(p.right, b.base)) {
+        p.Right();
+    } else if (key == 'k' && !core::collide(p.rotate, b.base) &&
+               !core::collide(p.round, b.base)) {
+        p.Rotate();
+    } else if (key == 'j' && !core::collide(p.down, b.base)) {
+        p.Down();
+    } else if (key == 'p') { // pause by pressing 'p'
+        term::pause(key);
+    } else if (key == 'q') { // quit by pressing 'q'
+        over = true;
+    }
+    // // avoid otherwise beep
+    // else {
+    //     std::cout << "\a";
+    // }
+}
+
 int main() {
     // Enable raw mode
     term::Termios orig_termios;
@@ -9,53 +30,28 @@ int main() {
     // Initialize the board
     bool game_over = false;
     std::array<std::string, HEIGHT> screen;
-    char ctrl;
+    char key;
 
-    core::Board b_ctx = core::Board();
-    core::Piece p_ctx;
-    p_ctx.Spawn(b_ctx.Pop());
+    core::Board b = core::Board();
+    core::Piece p;
+    p.Spawn(b.Pop());
 
     while (!game_over) {
-        game_over = core::step(p_ctx, b_ctx);
+        game_over = core::step(p, b);
 
-        if (read(STDIN_FILENO, &ctrl, 1) > 0) {
-            if (ctrl == 'h' && !core::collide(p_ctx.left, b_ctx.base)) {
-                p_ctx.Left();
-            } else if (ctrl == 'l' && !core::collide(p_ctx.right, b_ctx.base)) {
-                p_ctx.Right();
-            } else if (ctrl == 'k' &&
-                       !core::collide(p_ctx.rotate, b_ctx.base) &&
-                       !core::collide(p_ctx.round, b_ctx.base)) {
-                p_ctx.Rotate();
-            } else if (ctrl == 'j' && !core::collide(p_ctx.down, b_ctx.base)) {
-                p_ctx.Down();
-            } else if (ctrl == 'p') { // pause by pressing 'p'
-                while (true) {
-                    if (read(STDIN_FILENO, &ctrl, 1) > 0 && ctrl == 'p') {
-                        break;
-                    } else {
-                        usleep(10000);
-                    }
-                }
-            } else if (ctrl == 'q') { // quit by pressing 'q'
-                game_over = true;
-            } else { // otherwise beep
-                std::cout << "\a";
-            }
+        if (read(STDIN_FILENO, &key, 1) > 0) {
+            handle_key(key, p, b, game_over);
         }
 
         // update the active board
-        b_ctx.UpdateActive(p_ctx.cur);
-        core::ToString(b_ctx.active, screen);
+        b.UpdateActive(p.cur);
+        core::ToString(b.active, screen);
 
-        // clear the screen
+        // clear the screen and print the current state
         term::clearScreen();
+        term::printScreen(screen, p.Shape(b.next), b.lines, game_over);
 
-        // print the board
-        term::printScreen(screen, b_ctx.lines, game_over);
-
-        // Optional: Add a short delay for smoother animation
-        usleep(50000); // 50 milliseconds
+        usleep(10000); // ~100 FPS
     }
 
     term::disableRawMode(orig_termios);

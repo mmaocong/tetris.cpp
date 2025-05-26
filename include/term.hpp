@@ -31,7 +31,7 @@ namespace term {
     static inline void clearScreen() { std::cout << "\033[2J\033[1;1H"; }
 
     static inline void
-    printScreen(const std::array<std::string, HEIGHT> &screen,
+    printScreen(const std::array<std::string, HEIGHT> &screen, const char shape,
                 const uint16_t &s, const bool &game_over) {
         // add top border
         std::cout << std::string(42, '#') << std::endl;
@@ -49,7 +49,10 @@ namespace term {
             } else if (i == 4) {
                 std::cout << "  SCORE: " << std::setw(5) << s << "  "
                           << "##";
-            } else if (i == 6 && game_over) {
+            } else if (i == 6) {
+                std::cout << "   NEXT: " << std::setw(4) << shape << "   "
+                          << "##";
+            } else if (i == 10 && game_over) {
                 std::cout << "    GAME OVER   "
                           << "##";
             } else {
@@ -59,6 +62,14 @@ namespace term {
         }
         // add bottom border
         std::cout << std::string(42, '#') << std::endl;
+    }
+
+    static inline void pause(char key) {
+        while (true) {
+            if (read(STDIN_FILENO, &key, 1) > 0 && key == 'p')
+                break;
+            usleep(1000000); // 1 second delay to avoid busy waiting
+        }
     }
 
 } // namespace term
