@@ -1,18 +1,19 @@
 {
-    "version": 3,
+    "version": 10,
     "cmakeMinimumRequired": {
         "major": 3,
         "minor": 27,
         "patch": 0
     },
-    // TODO: consider adding `-mavx2` for AVX2 support
+    "$comment": "TODO: consider adding `-mavx2` for AVX2 support",
     "configurePresets": [
         {
             "name": "ux-debug",
             "displayName": "Unix Makefiles Debug",
             "description": "Debug build using Unix Makefiles",
             "hidden": false,
-            "binaryDir": "${sourceDir}/build", // clangd LSP requires no presetName
+            "$comment": "clangd LSP requires no presetName",
+            "binaryDir": "${sourceDir}/build",
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
@@ -28,7 +29,8 @@
             "displayName": "Unix Makefiles Release",
             "description": "Release build using Unix Makefiles",
             "hidden": false,
-            "binaryDir": "${sourceDir}/build", // clangd LSP requires no presetName
+            "$comment": "clangd LSP requires no presetName",
+            "binaryDir": "${sourceDir}/build",
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
